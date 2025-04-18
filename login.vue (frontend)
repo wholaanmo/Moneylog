@@ -1,0 +1,86 @@
+<template>
+    <div class="login-bg">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-form">
+                <form @submit.prevent="loginUser">
+                    <div class="login-form-items">
+                        <span class="login-label">LOG IN</span>
+                        <div class="text-input-container">
+                        <label class="form-label">EMAIL</label>
+                        <input v-model="email" type="text" name="email" class="text-style" required>
+                        
+                        <label class="form-label">PASSWORD</label>
+                        <input v-model="password" type="password" name="password" class="text-style" required>
+                        
+                    </div>
+
+                    <p style="color: red; margin-left: 15px;">{{ message }}</p>
+                    
+                        <button type="submit" class="login-btn">SIGN IN</button>
+                        <router-link to="/register" class="login-btn">SIGN UP</router-link>
+                    </div>
+                </form>    
+                </div>
+                
+        <div class="login-deco-container">
+        <div class="login-deco">
+        <span class="penny">MONEY <br> LOG</span>
+            <img src="/LOGO.png" alt="Logo Image" class="deco-image">  
+        </div>
+        </div>
+        </div>
+        </div>
+    </div>
+    </template>
+    
+    <script>
+    import { nextTick } from 'vue';
+    
+    export default {
+      data() {
+        return {
+          email: '',  // Corrected to email
+          password: '',
+          message: ''
+        };
+      },
+      methods: {
+        async loginUser() {
+          console.log("Login triggered");
+    
+          // Ensure the email and password are not empty before sending
+          if (!this.email || !this.password) {
+            this.message = "Please enter both email and password.";
+            return;
+          }
+    
+          const res = await fetch("http://127.0.0.1:8000/api/api-login", {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              email: this.email,  // Corrected to this.email
+              password: this.password
+            })
+          });
+    
+          const data = await res.json();
+          console.log(data);
+    
+          if (res.ok && data.access_token) {
+            // Store token if successful login
+            localStorage.setItem('authToken', data.access_token); // ✅
+    
+            // Redirect to Home page
+            this.$router.push("/home");
+          } else {
+            // Show error message if login failed
+            this.message = data.message || "Login failed";
+          }
+        },
+      }
+    };
+    </script>  
