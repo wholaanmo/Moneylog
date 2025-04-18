@@ -1,0 +1,26 @@
+<?php
+return [
+    'paths' => [
+        'api/*', 
+        'check-login', 
+        'oauth/*',
+        'expenses',
+        'expenses/*'
+    ],
+
+    'allowed_methods' => ['*'],
+
+    'allowed_origins' => ['http://localhost:5173'], // Temporarily allow all for debugging
+
+    'allowed_origins_patterns' => [],
+
+    'allowed_headers' => ['*'],
+
+    'exposed_headers' => [
+        'Authorization',
+    ],
+
+    'max_age' => 0,
+
+    'supports_credentials' => false,
+];
