@@ -1,0 +1,37 @@
+<?php
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    // Function to return all users
+    public function index()
+    {
+        // Get all users from the database
+        $users = User::all();
+
+        // Return the users as a JSON response
+        return response()->json($users);
+    }
+
+    // Function to return a specific user by their ID
+    public function show($id)
+    {
+        // Find user by ID
+        $user = User::find($id);
+
+        // If the user is not found, return an error
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'error' => 'User not found'
+            ], 404);
+        }
+
+        // Return the user as a JSON response
+        return response()->json($user);
+    }
+}
