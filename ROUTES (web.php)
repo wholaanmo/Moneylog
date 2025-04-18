@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+//use App\Http\Controllers\LoginController;
+
+// API routes first
+//Route::post('/api/login', [LoginController::class, 'login']); // logging in a user
+//Route::get('/check-login', [LoginController::class, 'checkLogin']); // checking if a user is logged in
+
+// ✅ New route to protect user data
+Route::get('/api/user-data', function () {
+    if (!Session::has('user_id')) {
+        return response()->json(['error' => 'Not logged in'], 403);
+    }
+
+    return response()->json(['data' => 'Secret stuff']);
+});
+
+// Catch-all route for Vue frontend (placed last)
+Route::get('/{any}', function () {
+    $path = public_path('index.html'); // index.html is inside public/
+
+    if (!File::exists($path)) {
+        abort(404, 'Vue index.html not found.');
+    }
+
+    return Response::make(File::get($path), 200)
+        ->header("Content-Type", "text/html");
+})->where('any', '.*');
+
+// Add to api.php or web.php
+Route::get('/test-cors', function() {
+    return response()->json([
+        'cors_config' => config('cors'),
+        'headers' => request()->headers->all()
+    ]);
+});
