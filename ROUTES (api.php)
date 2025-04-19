@@ -4,15 +4,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\ExpenseController;
 
 /* Public Routes */
-Route::post('/api-login', [LoginController::class, 'apiLogin']); // Changed from /api-login
+Route::post('/login', [LoginController::class, 'apiLogin']);
 Route::post('/register', [RegisterController::class, 'register']);
 
+// routes/api.php
+Route::middleware('auth:sanctum')->get('/check-login', function (Request $request) {
+    return response()->json([
+        'loggedIn' => true,
+        'user' => $request->user()
+    ]);
+});
+
 /* Protected Routes */
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     // Authentication check
     Route::get('/user', function (Request $request) {
         return $request->user();
