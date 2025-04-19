@@ -42,7 +42,9 @@
     </div>
     </template>
     
-<script>
+    <script>
+    import axios from 'axios';
+    
 export default {
   name: "Register", // or any name
   data() {
@@ -56,38 +58,53 @@ export default {
     }
   },
   methods: {
-  async registerUser() {
-    try {
-      const response = await fetch("http://localhost:8000/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify({
-          username: this.username,
-          email: this.email,
-          password: this.password,
-          password_confirmation: this.password_confirmation,
-          age: this.age,
-        }),
-      });
+    async registerUser() {
+  if (this.password !== this.password_confirmation) {
+    this.serverMessage = "Passwords don't match";
+    return;
+  }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+  await axios.get('http://localhost:8000/sanctum/csrf-cookie');
+
+  try {
+    const { data } = await axios.post("http://localhost:8000/api/register", {
+      username: this.username,
+      email: this.email,
+      password: this.password,
+      password_confirmation: this.password_confirmation,
+      age: this.age
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
       }
+    });
 
-      const data = await response.json();
-      console.log("Registration success:", data);
-      this.$router.push("/login"); // Redirect after success
+    console.log("Registration success:", data);
 
-    } catch (err) {
-      console.error("Registration error:", err);
-      this.serverMessage = err.message || "Registration failed. Please try again.";
+    if (data.success) {
+      // Registration successful — now redirect to login
+      this.serverMessage = "Registration successful. Please log in.";
+      this.$router.push("/login");
+    } else {
+      this.serverMessage = "Registration failed.";
     }
-  },
-},
-};
 
+  } catch (error) {
+    console.error("Registration error:", error);
+
+    if (error.response?.data?.errors) {
+      const errorMessages = Object.values(error.response.data.errors).flat();
+      this.serverMessage = errorMessages.join('\n');
+    } else {
+      this.serverMessage = error.message || "Registration failed. Please try again.";
+    }
+
+    // Clear password fields on error
+    this.password = '';
+    this.password_confirmation = '';
+  }
+}
+}
+};
 </script>
